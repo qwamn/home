@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+    <title>vue-admin</title>
+  </head>
+  <body>
+    <div id="app">
+    	<input id="img" type="file"  accept="image/*" size="30" ref="image" capture="user" >
+    	<img style="width: 200px;" id="imge" /> 
+    </div>
+    <!-- built files will be auto injected -->
+  </body>
+  <script>
+  	let img = document.getElementById('img')
+  	let imge = document.getElementById('imge')
+  	img.addEventListener('change', uploadImg)
+  	function uploadImg (node) {
+  		console.log(node)
+      let file = node.target.files[0]
+      let formData = new FormData()
+      let _this = this
+      if(!file) return
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = function(e) {
+        let img = new Image()
+        img.src = this.result
+        img.onload = function () {
+          let data = compress(img)
+
+          imge.src = data
+          let blob = dataURItoBlob(data)
+          formData.append("photo", blob)
+           // submitModify(formData)
+        }
+      }
+    }
+    function compress (img) {
+      let canvas = document.createElement("canvas")
+      let ctx = canvas.getContext("2d")
+      let initSize = img.src.length
+      let width = img.width
+      let height = img.height
+      canvas.width = width
+      canvas.height = height
+      ctx.fillStyle = "#fff"
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, 0, width, height)
+      let ndata = canvas.toDataURL("image/jpeg", 0.1)
+      return ndata
+    }
+    function dataURItoBlob(base64Data) {
+      var byteString
+      if (base64Data.split(",")[0].indexOf("base64") >= 0)
+        byteString = atob(base64Data.split(",")[1])
+      else byteString = unescape(base64Data.split(",")[1])
+      var mimeString = base64Data
+        .split(",")[0]
+        .split(":")[1]
+        .split(";")[0];
+      var ia = new Uint8Array(byteString.length)
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i)
+      }
+      return new Blob([ia], { type: mimeString })
+    }
+  </script>
+</html>
